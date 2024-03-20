@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    tools { 
+        python "Python"
+    }
     environment {
         DOCKER_IMAGE = 'weezy'
         DOCKER_REGISTRY = 'gym14714'
