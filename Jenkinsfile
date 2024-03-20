@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    tools { 
-        python "Python"
-    }
     environment {
         DOCKER_IMAGE = 'weezy'
         DOCKER_REGISTRY = 'gym14714'
@@ -23,14 +20,15 @@ pipeline {
                 script {
                     sh "${PYTHON_COMMAND} -m venv venv"
                     sh 'source venv/bin/activate'
+                    sh "${PYTHON_COMMAND} -m pip install django"
                     sh "${PYTHON_COMMAND} -m pip install -r requirements.txt"
                     sh "${PYTHON_COMMAND} manage.py makemigrations"
                     sh "${PYTHON_COMMAND} manage.py migrate"
                     sh "${PYTHON_COMMAND} -m pip install faker"
-                    sh "${PYTHON_COMMAND} -m pip install django"
                     sh "echo \"import seeder; seeder.seed_all(30)\" | ${PYTHON_COMMAND} manage.py shell"
                 }
             }
         }
     }
 }
+     
