@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_IMAGE = 'weezy'
+        DOCKER_IMAGE = 'chelsea'
         DOCKER_REGISTRY = 'gym14714'
         KUBECONFIG_CREDENTIAL_ID = 'my-kubeconfig-file'
         DOCKER_COMMAND = '/usr/local/bin/docker'
@@ -15,20 +15,39 @@ pipeline {
             }
         }
 
-        stage('Prepare Environment') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    sh "${PYTHON_COMMAND} -m venv venv"
-                    sh 'source venv/bin/activate'
-                    sh "${PYTHON_COMMAND} -m pip install django"
-                    sh "${PYTHON_COMMAND} -m pip install -r requirements.txt"
-                    sh "${PYTHON_COMMAND} manage.py makemigrations"
-                    sh "${PYTHON_COMMAND} manage.py migrate"
-                    sh "${PYTHON_COMMAND} -m pip install faker"
-                    sh "echo \"import seeder; seeder.seed_all(30)\" | ${PYTHON_COMMAND} manage.py shell"
+                    sh "${DOCKER_COMMAND} build -t ${DOCKER_REGISTRY}/${DOCKER_IMAGE} ."
                 }
             }
         }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'Dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                        sh "${DOCKER_COMMAND} login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASSWORD}"
+                        sh "${DOCKER_COMMAND} push ${DOCKER_REGISTRY}/${DOCKER_IMAGE}"
+                    }
+                }
+            }
+        }     
+         stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    // Use the kubeconfig file
+                    withCredentials([file(credentialsId: KUBECONFIG_CREDENTIAL_ID, variable: 'KUBECONFIG')]) {
+                        // Deploy to Kubernetes using kubectl commands
+                        sh "${KUBECTL_COMMAND} apply -f jd.yaml --validate=false"
+                        sh "${KUBECTL_COMMAND} apply -f django.yaml --validate=false"
+                    }
+                }
+            }
+        }
+
     }
 }
-     
+
+
+
+
