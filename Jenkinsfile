@@ -6,7 +6,7 @@ pipeline {
         KUBECONFIG_CREDENTIAL_ID = 'my-kubeconfig-file'
         DOCKER_COMMAND = '/usr/local/bin/docker'
         KUBECTL_COMMAND = '/usr/local/bin/kubectl'
-        PYTHON_COMMAND = '/usr/local/bin/python'
+        PYTHON_COMMAND = '/usr/local/bin/python3'
     }
     stages {
         stage('Checkout Code') {
@@ -14,7 +14,7 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         stage('Prepare Environment') {
             steps {
                 script {
