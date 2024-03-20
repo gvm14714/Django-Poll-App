@@ -6,7 +6,7 @@ pipeline {
         KUBECONFIG_CREDENTIAL_ID = 'my-kubeconfig-file'
         DOCKER_COMMAND = '/usr/local/bin/docker'
         KUBECTL_COMMAND = '/usr/local/bin/kubectl'
-        PYTHON_COMMAND = '/usr/local/bin/python3'
+        PYTHON_COMMAND = '/usr/local/bin/python'
     }
     stages {
         stage('Checkout Code') {
@@ -14,9 +14,12 @@ pipeline {
                 checkout scm
             }
         }
+        
         stage('Prepare Environment') {
             steps {
                 script {
+                    sh "${PYTHON_COMMAND} -m venv venv"
+                    sh 'source venv/bin/activate'
                     sh "${PYTHON_COMMAND} -m pip install -r requirements.txt"
                     sh "${PYTHON_COMMAND} manage.py makemigrations"
                     sh "${PYTHON_COMMAND} manage.py migrate"
