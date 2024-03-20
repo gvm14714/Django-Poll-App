@@ -24,6 +24,7 @@ pipeline {
                     sh "${PYTHON_COMMAND} manage.py makemigrations"
                     sh "${PYTHON_COMMAND} manage.py migrate"
                     sh "${PYTHON_COMMAND} -m pip install faker"
+                    sh "${PYTHON_COMMAND} -m pip install django"
                     sh "echo \"import seeder; seeder.seed_all(30)\" | ${PYTHON_COMMAND} manage.py shell"
                 }
             }
